@@ -5,7 +5,6 @@
 #include "chunk.h"
 
 
-
 // stack related
 #define STACK_MAX 256
 void push(Value value);

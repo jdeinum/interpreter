@@ -10,14 +10,22 @@ BINDIR=bin
 
 
 
-debug:
-	gcc -Wall -D DEBUG_TRACEEXECUTION -g -o $(BINDIR)/debug include/* src/*
-	./bin/debug
+
+all: directories obj
+	./bin/out
+
+debug: directories obj
+	gdb ./bin/out
+
+obj: 
+	gcc -Wall -g -o $(BINDIR)/out include/* src/*
 
 clean:
 	rm bin/*
 
 
+directories:
+	mkdir -p bin
 
 
 

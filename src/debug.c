@@ -15,6 +15,8 @@ void disassembleChunk(Chunk* chunk, const char* name) {
 		// since each instruction can have different sizes.
 		offset = disassembleInstruction(chunk, offset);
 	}
+	printf("== done ==\n");
+
 }
 
 
@@ -25,10 +27,10 @@ static int simpleInstruction(const char* name, int offset) {
 
 }
 
-static int constantInstruction(const char* name, Chunk* chunk,
-                               int offset) {
-	uint8_t constant = chunk->code[offset + 1];
-	printf("%-16s %4d '", name, constant);
+static int constantInstruction(const char* name, Chunk* chunk, int offset) {
+	uint8_t constant = chunk->code[offset + 1]; // get the value from the code
+	printf("%-16s %4d '", name, constant); // constant = offset within our \
+															value array
 	printValue(chunk->constants.values[constant]);
 	printf("'\n");
 	return offset + 2;
@@ -38,16 +40,8 @@ static int constantInstruction(const char* name, Chunk* chunk,
 // disassemble the instruction to make debugging easier
 int disassembleInstruction(Chunk* chunk, int offset) {
 	printf("%04d ", offset);
+	printf("%4d ", chunk->lines[offset]);
 	
-	// same line number as previously, no need to print line number for clarity
-	if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
-		printf(" | ");
-	} 
-	
-	// new line number
-	else {
-		printf("%4d ", chunk->lines[offset]);
-	}
 
 
 	// print correct instruction type and increment offset in the correct
