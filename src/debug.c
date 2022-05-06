@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "../include/debug.h"
 
+// analyze a chunk of code
 void disassembleChunk(Chunk* chunk, const char* name) {
 	printf("== %s ==\n", name);
 
@@ -27,6 +28,7 @@ static int simpleInstruction(const char* name, int offset) {
 
 }
 
+// print and also give us the index of the constant in the function
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
 	uint8_t constant = chunk->code[offset + 1]; // get the value from the code
 	printf("%-16s %4d '", name, constant); // constant = offset within our \

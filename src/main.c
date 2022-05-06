@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdio.h>
 
+
+// our repl, which takes user input line by line
 static void repl() {
 	char line[1024];
 	for (;;) {
@@ -20,6 +22,8 @@ static void repl() {
 	interpret(line);
 	}
 }
+
+
 
 static char* readFile(const char* path) {
 

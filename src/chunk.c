@@ -1,5 +1,6 @@
 /*
- * Define functions for interacting with chunks
+ * Define functions for interacting with chunks. Chunks are where our code and
+ * constants are stored. The chunks are then passed to the VM to be executed.
  */
 
 
@@ -7,6 +8,7 @@
 #include "../include/chunk.h"
 #include "../include/memory.h"
 #include "../include/value.h"
+
 
 // initialize our chunk of bytecode
 void initChunk(Chunk* chunk) {

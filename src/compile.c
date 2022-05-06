@@ -7,9 +7,13 @@
 #include "../include/debug.h"
 
 
+// Our Parser emits the correct token types for our source code.
+//
+// We keep track of both the current token and the prvious token, but the 
+// previous token is the one being analyzed
 typedef struct {
 	Token current;
-	Token previous; // keep track of both the current and previous tokens
+	Token previous;
 	bool hadError;
 	bool panicMode;
 } Parser;
@@ -37,7 +41,9 @@ typedef enum {
 typedef void (*ParseFn)();
 
 
-// TODO
+// For each token / pair of tokens, we have (if they exist) a prefix rule, an
+// infix rule, and it's precedence. Precedence is used to ensure that 
+// expression() doesn't consume more tokens than it should
 typedef struct {
 	ParseFn prefix;
 	ParseFn infix;
@@ -51,19 +57,27 @@ static ParseRule* getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
 
-// Global Declarations that we'll use
+// Global Declarations that we'll use. We could make these local, but we would
+// have to pass them around every time. 
 Parser parser;
 Chunk* compilingChunk;
 
+
+// Once user functions are defined, currentChunk may be a function chunk. We 
+// use current chunk to abstract away the details so the rest of the code 
+// doesn't need to change.
 static Chunk* currentChunk() {
 	return compilingChunk;
 }
 
+
+// Found an error at a perticular token. Print a useful message
 static void errorAt(Token* token, const char* message) {
 	if (parser.panicMode) return; // handle one error at a time
 	parser.panicMode = true;
 	fprintf(stderr, "[line %d] Error", token->line);
 
+	// go to the end when we shouldn't have 
 	if (token->type == TOKEN_EOF) {
 		fprintf(stderr, " at end");
 	} else if (token->type == TOKEN_ERROR) {
@@ -71,7 +85,8 @@ static void errorAt(Token* token, const char* message) {
 	} else {
 		fprintf(stderr, " at '%.*s'", token->length, token->start);
 	}
-
+	
+	// print our helpful message
 	fprintf(stderr, ": %s\n", message);
 	parser.hadError = true;
 }
@@ -87,8 +102,7 @@ static void error(const char* message) {
 	errorAt(&parser.previous, message);
 }
 
-// advance to the next token, saving the previous token in case we need to 
-// remember what it is
+// advance to the next token, saving the previous token
 static void advance() {
 	parser.previous = parser.current;
 
@@ -135,27 +149,27 @@ static void endCompiler() {
 
 
 
-
-// many tokens will require us to push 2 values on our chunk stack
+// many tokens will require us to push 2 values on our chunk stack.
 static void emitBytes(uint8_t byte1, uint8_t byte2) {
 	emitByte(byte1);
 	emitByte(byte2);
 }
 
-// add an OP_CONSTANT as well as the constant itself to our chunk, return
-// the index so we can later retrieve it.
+
+// Add a constant to the value array in the current chunk
 static uint8_t makeConstant(Value value) {
 	int constant = addConstant(currentChunk(), value);
 	if (constant > UINT8_MAX) {
 		error("Too many constants in one chunk.");
 		return 0;
 	}
-
 	return (uint8_t)constant;
 }
 
 
-// TODO
+
+// First put the OP_CONSTANT on our code stack, followed by the index of the 
+// value so that we can retrieve it later.
 static void emitConstant(Value value) {
 	emitBytes(OP_CONSTANT, makeConstant(value));
 }
@@ -229,26 +243,28 @@ static void binary() {
 	// we can represent >= , != , and <= as negations of the remaining
 	// operators
 	switch (operatorType) {
-		case TOKEN_PLUS: emitByte(OP_ADD); break;
-		case TOKEN_MINUS: emitByte(OP_SUBTRACT);break;
-		case TOKEN_STAR: emitByte(OP_MULTIPLY); break;
-		case TOKEN_SLASH: emitByte(OP_DIVIDE); break;
-		case TOKEN_BANG_EQUAL:    emitBytes(OP_EQUAL, OP_NOT); break;
-		case TOKEN_EQUAL_EQUAL:   emitByte(OP_EQUAL); break;
-		case TOKEN_GREATER:       emitByte(OP_GREATER); break;
-		case TOKEN_GREATER_EQUAL: emitBytes(OP_LESS, OP_NOT); break;
-		case TOKEN_LESS:          emitByte(OP_LESS); break;
-		case TOKEN_LESS_EQUAL:    emitBytes(OP_GREATER, OP_NOT); break;
-		default: return;
+		case TOKEN_PLUS:			emitByte(OP_ADD); break;
+		case TOKEN_MINUS:			emitByte(OP_SUBTRACT);break;
+		case TOKEN_STAR:			emitByte(OP_MULTIPLY); break;
+		case TOKEN_SLASH:			emitByte(OP_DIVIDE); break;
+		case TOKEN_BANG_EQUAL:		emitBytes(OP_EQUAL, OP_NOT); break;
+		case TOKEN_EQUAL_EQUAL:		emitByte(OP_EQUAL); break;
+		case TOKEN_GREATER:			emitByte(OP_GREATER); break;
+		case TOKEN_GREATER_EQUAL:	emitBytes(OP_LESS, OP_NOT); break;
+		case TOKEN_LESS:			emitByte(OP_LESS); break;
+		case TOKEN_LESS_EQUAL:		emitBytes(OP_GREATER, OP_NOT); break;
+		default:					return;
 	}
 }
 
+
+// handles generating bytecode for true, false, and nil
 static void literal() {
 	switch (parser.previous.type) {
-	  case TOKEN_FALSE: emitByte(OP_FALSE); break;
-	  case TOKEN_NIL: emitByte(OP_NIL); break;
-	  case TOKEN_TRUE: emitByte(OP_TRUE); break;
-	  default: return; // Unreachable.
+		case TOKEN_FALSE: emitByte(OP_FALSE); break;
+		case TOKEN_NIL: emitByte(OP_NIL); break;
+		case TOKEN_TRUE: emitByte(OP_TRUE); break;
+		default: return; // Unreachable.
 	}
 }
 
