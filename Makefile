@@ -18,7 +18,7 @@ debug: directories obj
 	gdb ./bin/out
 
 obj: 
-	gcc -Wall -g -o $(BINDIR)/out include/* src/* 2>/dev/null
+	gcc -Wall -g -o $(BINDIR)/out include/* src/* 
 
 clean:
 	rm bin/*

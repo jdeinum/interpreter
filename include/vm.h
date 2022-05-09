@@ -19,6 +19,7 @@ typedef enum {
 } InterpretResult;
 
 
+
 InterpretResult interpret(const char* source);
 
 typedef struct {
@@ -28,7 +29,8 @@ typedef struct {
 	uint8_t* ip; 
 	Value stack[STACK_MAX];
 	Value* stackTop;
-} VM;
+	Obj* objects;
+} VM; 
 
 void initVM();
 void freeVM();
