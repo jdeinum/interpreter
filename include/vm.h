@@ -3,6 +3,7 @@
 
 
 #include "chunk.h"
+#include "table.h"
 
 
 // stack related
@@ -30,6 +31,8 @@ typedef struct {
 	Value stack[STACK_MAX];
 	Value* stackTop;
 	Obj* objects;
+	Table strings;
+	Table globals;
 } VM; 
 
 void initVM();
