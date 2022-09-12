@@ -332,16 +332,13 @@ static void statement() {
   }
 }
 
-static uint8_t identifierConstant(Token* name) {
-  return makeConstant(OBJ_VAL(copyString(name->start,
-                                         name->length)));
+static uint8_t identifierConstant(Token *name) {
+  return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
 }
 
 static void defineVariable(uint8_t global) {
   emitBytes(OP_DEFINE_GLOBAL, global);
 }
-
-
 
 static void varDeclaration() {
   uint8_t global = parseVariable("Expect variable name.");
@@ -351,8 +348,7 @@ static void varDeclaration() {
   } else {
     emitByte(OP_NIL);
   }
-  consume(TOKEN_SEMICOLON,
-          "Expect ';' after variable declaration.");
+  consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
   defineVariable(global);
 }

@@ -3,7 +3,7 @@
  * constants are stored. The chunks are then passed to the VM to be executed.
  */
 
-
+#include <stdio.h>
 
 #include "../include/chunk.h"
 #include "../include/memory.h"
