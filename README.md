@@ -1,8 +1,7 @@
 # Interpreter
+Creating a simple stack based programming language in C!
 
 ## Overview
-
-Creating a simple stack based programming language in C!
 
 The programming language will support: 
 1. Basic Expressions 
