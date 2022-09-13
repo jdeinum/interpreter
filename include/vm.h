@@ -4,10 +4,12 @@
 
 #include "chunk.h"
 #include "table.h"
+#include "object.h"
 
 
 // stack related
-#define STACK_MAX 256
+#define FRAMES_MAX 64
+#define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 void push(Value value);
 Value pop();
 
@@ -20,14 +22,19 @@ typedef enum {
 } InterpretResult;
 
 
+typedef struct {
+  ObjFunction* function;
+  uint8_t* ip;
+  Value* slots;
+} CallFrame;
+
+
 
 InterpretResult interpret(const char* source);
 
 typedef struct {
-	Chunk* chunk;
-	// keep track of which instruction we're at
-	// using a pointer is faster than using an index
-	uint8_t* ip; 
+  CallFrame frames[FRAMES_MAX];
+  int frameCount;
 	Value stack[STACK_MAX];
 	Value* stackTop;
 	Obj* objects;
